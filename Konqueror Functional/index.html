@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konqueror 1.0</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="scoreboard">
+        <div id="redScore">Red: 0</div>
+        <div id="blueScore">Blue: 0</div>
+        <div id="greenScore">Green: 0</div>
+        <div id="yellowScore">Yellow: 0</div>
+    </div>
+    <div id="teamMenu">
+        <div id="redTeam" class="teamOption" style="background-color: red;">Red Team</div>
+        <div id="blueTeam" class="teamOption" style="background-color: blue;">Blue Team</div>
+        <div id="greenTeam" class="teamOption" style="background-color: green;">Green Team</div>
+        <div id="yellowTeam" class="teamOption" style="background-color: yellow;">Yellow Team</div>
+    </div>
+    
+    <!-- Add this button to trigger team creation -->
+    <button id="createTeamButton">Create Team</button>
+    
+    <!-- Add this modal form for entering team details -->
+    <div id="teamCreationModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="teamCreationForm">
+                <label for="teamName">Team Name:</label>
+                <input type="text" id="teamName" name="teamName" required>
+                <label for="teamColor">Team Color:</label>
+                <input type="color" id="teamColor" name="teamColor" required>
+                <button type="submit">Create</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="cooldownBarContainer">
+        <div id="cooldownBar"></div>
+    </div>
+    <div id="gridContainer"></div>
+    <div id="colorMenu"></div>
+    <div id="messagePopup" class="popup"></div>
+    <div id="victoryScreen" class="popup"></div>
+    <script src="game.js"></script>
+</body>
+</html>
