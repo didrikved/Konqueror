@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     const squares = [];
-
+    console.log("starting game")
     // Create the grid
     for (let row = 0; row < gridSize; row++) {
         const rowSquares = [];
