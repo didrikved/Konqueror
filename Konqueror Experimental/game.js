@@ -128,36 +128,46 @@ document.addEventListener('DOMContentLoaded', () => {
         const row = parseInt(square.dataset.row);
         const col = parseInt(square.dataset.col);
         const currentTeam = square.dataset.team;
-
+    
         if (selectedTeam && canClick) {
             const teamColor = teamColorMap[selectedTeam].primary;
+    
+            // If the clicked tile belongs to the selected team, do nothing
+            if (currentTeam === selectedTeam) {
+                return;
+            }
+    
+            // Handle the scenario where the tile does not belong to the selected team
             if (teamTiles[selectedTeam] === 0 && !capitals[selectedTeam].exists) {
                 // First tile clicked by a new team, make it the capital
                 makeCapital(square, selectedTeam, teamColor);
                 startCooldown(); // Start cooldown when making a capital
-            } else if (currentTeam !== selectedTeam && canChangeTeam(square, selectedTeam)) {
-                if (square.classList.contains('capital')) {
-                    capitals[currentTeam].clicks++;
-                    console.log(`Capital clicked ${capitals[currentTeam].clicks} times`);
-                    startCooldown(); // Start cooldown when attacking a capital
-                    if (capitals[currentTeam].clicks >= 3) { // Require 3 clicks to conquer
-                        conquerCapital(square, selectedTeam, teamColor);
+            } else if (currentTeam !== selectedTeam) {
+                if (canChangeTeam(square, selectedTeam)) {
+                    if (square.classList.contains('capital')) {
+                        capitals[currentTeam].clicks++;
+                        console.log(`Capital clicked ${capitals[currentTeam].clicks} times`);
+                        startCooldown(); // Start cooldown when attacking a capital
+                        if (capitals[currentTeam].clicks >= 3) { // Require 3 clicks to conquer
+                            conquerCapital(square, selectedTeam, teamColor);
+                        }
+                    } else {
+                        square.style.backgroundColor = teamColor;
+                        square.dataset.team = selectedTeam;
+                        teamTiles[selectedTeam]++;
+                        console.log(`Tile placed by ${selectedTeam}, total tiles: ${teamTiles[selectedTeam]}`);
+                        updateScoreboard();
+                        startCooldown(); // Start cooldown when conquering a tile
+                        checkGameState();
                     }
                 } else {
-                    square.style.backgroundColor = teamColor;
-                    square.dataset.team = selectedTeam;
-                    teamTiles[selectedTeam]++;
-                    console.log(`Tile placed by ${selectedTeam}, total tiles: ${teamTiles[selectedTeam]}`);
-                    updateScoreboard();
-                    startCooldown(); // Start cooldown when conquering a tile
-                    checkGameState();
+                    // Show error message if the tile is not adjacent to one of the team's tiles
+                    showErrorPopup("You can't click this tile. It's not next to your team's tiles.");
                 }
-            } else {
-                // Show error message if the tile is not adjacent to one of the team's tiles
-                showErrorPopup("You can't click this tile. It's not next to your team's tiles.");
             }
         }
     }
+    
 
     function makeCapital(square, team, color) {
         const secondaryColor = teamColorMap[team].secondary;
