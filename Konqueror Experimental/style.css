@@ -197,3 +197,17 @@ body {
     text-decoration: none;
     cursor: pointer;
 }
+
+/* Blink Effect for Capital Attack */
+@keyframes blink {
+    0% {
+        background-color: var(--attack-color);
+    }
+    100% {
+        background-color: var(--original-color);
+    }
+}
+
+.blink {
+    animation: blink 0.2s ease-in-out;
+}
