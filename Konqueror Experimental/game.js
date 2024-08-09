@@ -404,17 +404,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // New functionality for creating teams
     createTeamButton.addEventListener('click', () => {
         teamCreationModal.style.display = 'block';
+        createTeamButton.style.display = 'none'; // Hide the Create Team button
     });
-
+    
     closeModal.addEventListener('click', () => {
         teamCreationModal.style.display = 'none';
+        createTeamButton.style.display = 'block'; // Show the Create Team button again
     });
-
+    
     window.addEventListener('click', (event) => {
         if (event.target == teamCreationModal) {
             teamCreationModal.style.display = 'none';
+            createTeamButton.style.display = 'block'; // Show the Create Team button again
         }
-    });
+    });    
 
     teamCreationForm.addEventListener('submit', (event) => {
         event.preventDefault();
