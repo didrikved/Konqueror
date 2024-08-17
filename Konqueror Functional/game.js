@@ -35,13 +35,16 @@ document.addEventListener("DOMContentLoaded", () => {
             square.style.backgroundColor = teamColor;
 
             // Check if this square is the capital
-            if (team.capital && team.capital.row == row && team.capital.col == col) {
+            if (
+              team.capital &&
+              team.capital.row == row &&
+              team.capital.col == col
+            ) {
               square.classList.add("capital"); // Add the capital class
               square.style.setProperty("--star-color", team.secondaryColor); // Set the star color
             } else {
               square.classList.remove("capital"); // Ensure non-capital squares don't have the class
             }
-
           } else {
             teamColor = noTeamColor;
             square.style.backgroundColor = teamColor;
@@ -67,7 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
           square.classList.remove("blink");
         }, 200); // Duration matches the CSS animation time
       });
-
     } else {
       throw Error("Unknown event type: " + data.event);
     }
@@ -237,9 +239,6 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       socket.send(JSON.stringify(message));
     }
-
-
-
   }
 
   function makeCapital(square, team, color) {
