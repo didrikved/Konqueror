@@ -14,26 +14,26 @@ document.addEventListener("DOMContentLoaded", () => {
      *      teams:{
      *          [string]:{color:string,secondaryColor:string,capital:{row:number, col:number}}
      *      },
-     *      attackedCapitals: {row: number, col: number}[]
+     *      attackedCapitals: {row: number, col: number, attacker: string, defender: string}[]
      *  }
      * }
      */
-  
+
     const data = JSON.parse(event.data);
-  
+
     if (data.event === "updateSquares") {
       for (let row = 0; row < gridSize; row++) {
         for (let col = 0; col < gridSize; col++) {
           const square = squares[row][col];
           const teamName = data.squares[row][col];
           let teamColor;
-  
+
           if (teamName !== null) {
             const team = data.teams[teamName];
             if (team === null) throw Error("Unknown team: " + teamName);
             teamColor = team.color;
             square.style.backgroundColor = teamColor;
-  
+
             // Check if this square is the capital
             if (team.capital && team.capital.row == row && team.capital.col == col) {
               square.classList.add("capital"); // Add the capital class
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
               square.classList.remove("capital"); // Ensure non-capital squares don't have the class
             }
-  
+
           } else {
             teamColor = noTeamColor;
             square.style.backgroundColor = teamColor;
@@ -49,23 +49,29 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
       }
-      
+
       // Apply the blink effect to attacked capitals
-      data.attackedCapitals.forEach(({ row, col }) => {
+      data.attackedCapitals.forEach(({ row, col, attacker, defender }) => {
         const square = squares[row][col];
+        const attackerColor = data.teams[attacker].color;
+        const defenderColor = data.teams[defender].color;
+
+        // Set custom properties for attack and original colors
+        square.style.setProperty("--attack-color", attackerColor);
+        square.style.setProperty("--original-color", defenderColor);
+
         square.classList.add("blink");
-        
+
         // Remove the blink class after the animation ends
         setTimeout(() => {
           square.classList.remove("blink");
         }, 200); // Duration matches the CSS animation time
       });
-  
+
     } else {
       throw Error("Unknown event type: " + data.event);
     }
   });
-  
 
   socket.addEventListener("error", function (event) {
     console.error("WebSocket error: ", event);
@@ -220,17 +226,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }),
     );
 
-   // Example function to send capital creation request
-function sendColorSquareRequest(row, col, makeCapital = false) {
-  const message = {
-    event: "colorSquare",
-    team: selectedTeam,
-    row: row,
-    col: col,
-    makeCapital: makeCapital, // Add this flag if attempting to create a capital
-  };
-  socket.send(JSON.stringify(message));
-}
+    // Example function to send capital creation request
+    function sendColorSquareRequest(row, col, makeCapital = false) {
+      const message = {
+        event: "colorSquare",
+        team: selectedTeam,
+        row: row,
+        col: col,
+        makeCapital: makeCapital, // Add this flag if attempting to create a capital
+      };
+      socket.send(JSON.stringify(message));
+    }
 
 
 
