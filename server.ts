@@ -60,6 +60,15 @@ const server = Bun.serve<{ authToken: string }>({
         }
       } else throw Error("Invalid message");
     },
+    open(ws) {
+      ws.send(
+        JSON.stringify({
+          event: "updateSquares",
+          squares: squaresData,
+          teams: teams,
+        }),
+      );
+    },
   },
 });
 
