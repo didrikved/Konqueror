@@ -36,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
             teamColor = noTeamColor;
           }
 
-          console.log(teamColor);
           square.style.backgroundColor = teamColor;
         }
       }
