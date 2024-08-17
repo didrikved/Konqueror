@@ -8,6 +8,16 @@ body {
     display: none;
 }
 
+.zoomable {
+    cursor: grab;
+    overflow: hidden;
+    position: relative;
+}
+
+.zoomable:active {
+    cursor: grabbing;
+}
+
 #errorPopup {
     display: none;
     position: fixed;
@@ -111,32 +121,28 @@ body {
 
 #gridContainer {
     display: grid;
-    grid-template-columns: repeat(10, 50px); /* 10 columns */
-    grid-template-rows: repeat(10, 50px); /* 10 rows */
+    grid-template-columns: repeat(100, 20px); /* 100 columns of 20px each */
+    grid-template-rows: repeat(100, 20px); /* 100 rows of 20px each */
     gap: 2px;
-    margin: 20px auto; /* Center the grid horizontally */
+    margin: 0 auto;
     width: max-content;
-    margin-top: 20px; /* Space below the create team button */
-    z-index: 7;
+    height: max-content;
+    transform-origin: top left; /* Set origin for zooming */
+    transition: transform 0.1s ease-out; /* Smooth transition for panning */
+    cursor: grab;
+    position: relative; /* Necessary for proper offset calculations */
 }
 
 .gridSquare {
-    width: 50px;
-    height: 50px;
+    width: 20px;
+    height: 20px;
     background-color: grey;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 12px;
     cursor: pointer;
     position: relative;
-}
-
-.capital::after {
-    content: '★';
-    position: absolute;
-    color: var(--star-color, yellow);
-    font-size: 20px;
 }
 
 #scoreboard {

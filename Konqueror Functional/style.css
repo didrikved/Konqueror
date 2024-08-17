@@ -1,118 +1,35 @@
 body {
+    font-family: Arial, sans-serif;
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: #f0f0f0;
+    padding: 0;
 }
 
-#scoreboard, #teamMenu, #cooldownBarContainer {
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
-    background-color: #fff;
-    padding: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+.hidden {
+    display: none;
 }
 
-#teamMenu {
-    flex-direction: row; /* Make sure the team menu items are in a row */
-}
-
-.teamOption {
-    cursor: pointer;
-    padding: 10px 20px;
-    color: white;
-    font-weight: bold;
-    border: 2px solid transparent; /* Default border for team options */
-}
-
-.teamOption.highlighted {
-    border-color: #000; /* Change to a color that stands out */
-}
-
-#gridContainer {
-    display: grid;
-    grid-template-columns: repeat(10, 50px); /* 10 columns */
-    grid-template-rows: repeat(10, 50px); /* 10 rows */
-    gap: 2px;
-}
-
-.gridSquare {
-    width: 50px;
-    height: 50px;
-    background-color: white;
-    border: 1px solid #ccc;
-    cursor: pointer;
-}
-
-#cooldownBarContainer {
-    height: 10px;
-    width: 100%;
-    background-color: #e0e0e0;
-}
-
-#cooldownBar {
-    height: 100%;
-    width: 0;
-    background-color: #76c7c0;
-}
-
-@keyframes cooldownAnimation {
-    from { width: 100%; }
-    to { width: 0%; }
-}
-
-.popup {
+#errorPopup {
     display: none;
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: white;
-    border: 1px solid #ccc;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
+    background-color: rgba(255, 0, 0, 0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
     text-align: center;
-    font-size: 24px;
-    color: #333;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 1s ease-out;
 }
 
-.gridSquare.capital {
-    position: relative;
+#introScreen {
+    text-align: center;
+    margin-top: 50px;
 }
 
-.gridSquare.capital::after {
-    content: '★'; /* Unicode star character */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 24px;
-}
-
-.gridSquare.capital.red::after {
-    color: darkred;
-}
-
-.gridSquare.capital.blue::after {
-    color: lightblue;
-}
-
-.gridSquare.capital.green::after {
-    color: lightgreen;
-}
-
-.gridSquare.capital.yellow::after {
-    color: orange;
-}
-
-/* Button for creating a new team */
-#createTeamButton {
+#playGameButton, #createTeamButton {
     padding: 10px 20px;
     background-color: #4CAF50;
     color: white;
@@ -123,45 +40,66 @@ body {
     margin-top: 20px;
 }
 
-#createTeamButton:hover {
-    background-color: #45a049;
-}
-
-/* Team creation modal styling */
-#teamCreationModal {
+#gameContent {
     display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    border: 1px solid #ccc;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
+    margin-top: 100px; /* Space for team menu and cooldown bar */
 }
 
-#teamCreationModal .close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
-}
-
-#teamCreationForm {
+#teamMenu {
+    width: 100%;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-#teamCreationForm input[type="text"],
-#teamCreationForm input[type="color"] {
-    margin: 10px 0;
+    justify-content: space-around; /* Distributes the team options evenly */
     padding: 10px;
-    font-size: 16px;
+    background-color: #f1f1f1;
+    box-sizing: border-box; /* Ensures padding is included in the element's total width and height */
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
 }
 
-#teamCreationForm button {
+.teamOption {
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    flex-grow: 1;
+    margin: 0 5px;
+}
+
+.highlighted {
+    border: 2px solid black;
+}
+
+#cooldownBar {
+    width: 100%;
+    height: 20px; /* Adjust height as needed */
+    background-color: #ddd; /* Background color for the cooldown bar */
+    position: fixed;
+    top: 50px; /* Adjust this value to position correctly under teamMenu */
+    left: 0;
+    overflow: hidden;
+    box-sizing: border-box; /* Ensures padding is included in the element's total width and height */
+    margin: 0; /* Remove any default margin */
+    z-index: 9;
+}
+
+#cooldownBar div {
+    height: 100%;
+    background-color: #4CAF50; /* Color for the filling part of the cooldown bar */
+    width: 0; /* Initial width */
+}
+
+#buttonContainer {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0; /* Optional: adds some vertical spacing */
+    position: relative;
+    z-index: 8;
+    top: 10px; /* Adjusted value to position the button closer to the cooldown bar */
+}
+
+#createTeamButton {
     padding: 10px 20px;
     background-color: #4CAF50;
     color: white;
@@ -171,6 +109,105 @@ body {
     cursor: pointer;
 }
 
-#teamCreationForm button:hover {
-    background-color: #45a049;
+#gridContainer {
+    display: grid;
+    grid-template-columns: repeat(10, 50px); /* 10 columns */
+    grid-template-rows: repeat(10, 50px); /* 10 rows */
+    gap: 2px;
+    margin: 20px auto; /* Center the grid horizontally */
+    width: max-content;
+    margin-top: 20px; /* Space below the create team button */
+    z-index: 7;
+}
+
+.gridSquare {
+    width: 50px;
+    height: 50px;
+    background-color: grey;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    position: relative;
+}
+
+.capital::after {
+    content: '★';
+    position: absolute;
+    color: var(--star-color, yellow);
+    font-size: 20px;
+}
+
+#scoreboard {
+    display: flex;
+    justify-content: space-around;
+    margin: 10px 0;
+}
+
+#messagePopup {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    display: none;
+}
+
+#victoryScreen {
+    display: none;
+    text-align: center;
+    margin-top: 50px;
+}
+
+#teamCreationModal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+}
+
+#teamCreationModal .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+#teamCreationModal .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+#teamCreationModal .close:hover,
+#teamCreationModal .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Blink Effect for Capital Attack */
+@keyframes blink {
+    0% {
+        background-color: var(--attack-color);
+    }
+    100% {
+        background-color: var(--original-color);
+    }
+}
+
+.blink {
+    animation: blink 0.2s ease-in-out;
 }
