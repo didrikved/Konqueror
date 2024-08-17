@@ -1,5 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const socket = new WebSocket("ws://localhost:3000");
+  const useProd = true;
+  let url;
+
+  if (useProd) {
+    url = "wss://konqueror-1.onrender.com";
+  } else {
+    url = "ws://localhost:3000";
+  }
+
+  const socket = new WebSocket(url);
 
   socket.addEventListener("open", function (event) {
     console.log("WebSocket connection opened");
