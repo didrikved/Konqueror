@@ -50,10 +50,17 @@ const server = Bun.serve<{ authToken: string }>({
         const { event, team, row, col } = data;
 
         // Explicitly define the type of attackedCapitals
-        let attackedCapitals: { row: number; col: number; attacker: string; defender: string }[] = [];
+        let attackedCapitals: {
+          row: number;
+          col: number;
+          attacker: string;
+          defender: string;
+        }[] = [];
 
         if (event === "colorSquare") {
-          console.log(`Coloring square at row ${row}, col ${col} for team ${team}`);
+          console.log(
+            `Coloring square at row ${row}, col ${col} for team ${team}`,
+          );
 
           const teamTileCount = countTeamTiles(team);
 
@@ -61,19 +68,32 @@ const server = Bun.serve<{ authToken: string }>({
             // No capital and no tiles; this tile becomes the capital
             teams[team].capital = { row, col, clicks: 0 };
             squaresData[row][col] = team;
-            console.log(`Capital placed for team ${team} at row ${row}, col ${col}`);
+            console.log(
+              `Capital placed for team ${team} at row ${row}, col ${col}`,
+            );
           } else if (squaresData[row][col] !== team) {
             const currentTeam = squaresData[row][col];
-            if (currentTeam && teams[currentTeam].capital?.row === row && teams[currentTeam].capital?.col === col) {
+            if (
+              currentTeam &&
+              teams[currentTeam].capital?.row === row &&
+              teams[currentTeam].capital?.col === col
+            ) {
               // Handle attacks on a capital
               teams[currentTeam].capital.clicks++;
-              attackedCapitals.push({ row, col, attacker: team, defender: currentTeam });
+              attackedCapitals.push({
+                row,
+                col,
+                attacker: team,
+                defender: currentTeam,
+              });
 
               if (teams[currentTeam].capital.clicks >= 3) {
                 // Conquer the capital
                 teams[currentTeam].capital = null;
                 squaresData[row][col] = team;
-                console.log(`Capital at row ${row}, col ${col} conquered by team ${team}`);
+                console.log(
+                  `Capital at row ${row}, col ${col} conquered by team ${team}`,
+                );
               }
             } else {
               // Normal tile capture
@@ -95,12 +115,13 @@ const server = Bun.serve<{ authToken: string }>({
       }
     },
     open(ws) {
+      console.log("opening new websocket connection: ", JSON.stringify(ws));
       ws.send(
         JSON.stringify({
           event: "updateSquares",
           squares: squaresData,
           teams: teams,
-          attackedCapitals: []
+          attackedCapitals: [],
         }),
       );
     },
