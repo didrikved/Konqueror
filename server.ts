@@ -8,7 +8,7 @@ const players = {
 };
 
 const teams = {
-  red: { color: "red", secondaryColor: "lightred", capital: null },
+  red: { color: "red", secondaryColor: "darkred", capital: null },
   blue: { color: "blue", secondaryColor: "cyan", capital: null },
 };
 
@@ -49,6 +49,9 @@ const server = Bun.serve<{ authToken: string }>({
         const data = JSON.parse(message);
         const { event, team, row, col } = data;
 
+        // Explicitly define the type of attackedCapitals
+        let attackedCapitals: { row: number; col: number }[] = [];
+
         if (event === "colorSquare") {
           console.log(`Coloring square at row ${row}, col ${col} for team ${team}`);
 
@@ -64,6 +67,8 @@ const server = Bun.serve<{ authToken: string }>({
             if (currentTeam && teams[currentTeam].capital?.row === row && teams[currentTeam].capital?.col === col) {
               // Handle attacks on a capital
               teams[currentTeam].capital.clicks++;
+              attackedCapitals.push({ row, col }); // Track the attacked capital
+
               if (teams[currentTeam].capital.clicks >= 3) {
                 // Conquer the capital
                 teams[currentTeam].capital = null;
@@ -82,10 +87,13 @@ const server = Bun.serve<{ authToken: string }>({
               event: "updateSquares",
               squares: squaresData,
               teams: teams,
+              attackedCapitals: attackedCapitals, // Include attacked capitals in the message
             }),
           );
         }
-      } else throw Error("Invalid message");
+      } else {
+         throw Error("Invalid message") 
+        }
     },
     open(ws) {
       ws.send(

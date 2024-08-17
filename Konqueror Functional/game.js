@@ -13,7 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
      *      squares:(string|null)[][],
      *      teams:{
      *          [string]:{color:string,secondaryColor:string,capital:{row:number, col:number}}
-     *      }
+     *      },
+     *      attackedCapitals: {row: number, col: number}[]
      *  }
      * }
      */
@@ -48,6 +49,18 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
       }
+      
+      // Apply the blink effect to attacked capitals
+      data.attackedCapitals.forEach(({ row, col }) => {
+        const square = squares[row][col];
+        square.classList.add("blink");
+        
+        // Remove the blink class after the animation ends
+        setTimeout(() => {
+          square.classList.remove("blink");
+        }, 200); // Duration matches the CSS animation time
+      });
+  
     } else {
       throw Error("Unknown event type: " + data.event);
     }
