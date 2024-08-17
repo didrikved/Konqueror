@@ -1,1 +1,10 @@
-{ "dependencies": { "@types/bun": "^1.1.6", "prettier": "^3.3.3", "vite": "^5.4.1" } }
+{
+  "dependencies": {
+    "@types/bun": "^1.1.6",
+    "prettier": "^3.3.3",
+    "vite": "^5.4.1"
+  },
+  "scripts": {
+    "start": "bun --watch server.ts"
+  }
+}
