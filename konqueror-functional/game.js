@@ -3,11 +3,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
   socket.addEventListener("open", function (event) {
     console.log("WebSocket connection opened");
-    socket.send("Hello didrik!");
+    // socket.send("Hello didrik!");
   });
 
   socket.addEventListener("message", function (event) {
-    console.log("Message from server ", event.data);
+    /**
+     * @type {
+     *  {
+     *      event:"updateSquares",
+     *      squares:(string|null)[][],
+     *      teams:{
+     *          [string]:{color:string,secondaryColor:string}
+     *      }
+     *  }
+     * }
+     */
+
+    const data = JSON.parse(event.data);
+
+    if (data.event === "updateSquares") {
+      console.log(data.squares);
+
+      for (let row = 0; row < gridSize; row++) {
+        for (let col = 0; col < gridSize; col++) {
+          const square = squares[row][col];
+          const teamName = data.squares[row][col];
+          let teamColor;
+          if (teamName !== null) {
+            const team = data.teams[teamName];
+            if (team === null) throw Error("Unknown team: " + teamName);
+            teamColor = team.color;
+          } else {
+            teamColor = noTeamColor;
+          }
+
+          console.log(teamColor);
+          square.style.backgroundColor = teamColor;
+        }
+      }
+    } else {
+      throw Error("Unknown event type: " + data.event);
+    }
   });
 
   socket.addEventListener("error", function (event) {
@@ -64,13 +100,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const squares = [];
-  const squaresData = [];
+  const noTeamColor = "rgb(245,245,245)";
 
-  console.log("starting game");
   // Create the grid with white squares and no assigned teams
   for (let row = 0; row < gridSize; row++) {
     const rowSquares = [];
-    const rowSquaresdata = [];
+
     for (let col = 0; col < gridSize; col++) {
       const square = document.createElement("div");
       square.classList.add("gridSquare");
@@ -80,13 +115,10 @@ document.addEventListener("DOMContentLoaded", () => {
       square.dataset.row = row;
       square.dataset.col = col;
 
-      const squareData = { team: "" };
-
       rowSquares.push(square);
-      rowSquaresdata.push(squareData);
     }
+
     squares.push(rowSquares);
-    rowSquaresdata.push(rowSquaresdata);
   }
 
   // Create the team selection menu
@@ -107,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
     introScreen.style.display = "none";
     gameContent.classList.remove("hidden");
     gameContent.style.display = "block";
-    placeRandomCapitals(); // Place the capitals randomly within their zones
+    // placeRandomCapitals(); // Place the capitals randomly within their zones
   });
 
   // Function to place capitals randomly for the initial teams within their respective zones
@@ -130,8 +162,8 @@ document.addEventListener("DOMContentLoaded", () => {
           getRandomInt(zone.colRange[1] - zone.colRange[0] + 1) +
           zone.colRange[0];
         const square = squares[row][col];
-        const squaresData = squaresData[row][col];
-        if (squaresData.team === "") {
+        const squareData = squaresData[row][col];
+        if (squareData.team === "") {
           // Ensure the square is not assigned to any team
           makeCapital(square, color, teamColorMap[color].primary);
           placed = true;
@@ -159,89 +191,87 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function colorSquare(square) {
     socket.send(
-      "click on square " + square.dataset.row + " " + square.dataset.col,
+      JSON.stringify({
+        event: "colorSquare",
+        row: square.dataset.row,
+        col: square.dataset.col,
+        team: selectedTeam,
+      }),
     );
 
-    console.log(square);
-    const row = parseInt(square.dataset.row);
-    const col = parseInt(square.dataset.col);
-    const currentTeam = square.dataset.team;
+    // const row = parseInt(square.dataset.row);
+    // const col = parseInt(square.dataset.col);
+    // const currentTeam = square.dataset.team;
 
-    if (selectedTeam) {
-      const teamColor = teamColorMap[selectedTeam].primary;
+    // if (selectedTeam) {
+    //   const teamColor = teamColorMap[selectedTeam].primary;
 
-      if (!canClick) {
-        // Buffer the click if cooldown is active
-        bufferedClick = square;
-        console.log("Click buffered during cooldown");
-        return;
-      }
+    //   if (!canClick) {
+    //     // Buffer the click if cooldown is active
+    //     bufferedClick = square;
+    //     console.log("Click buffered during cooldown");
+    //     return;
+    //   }
 
-      // If the clicked tile belongs to the selected team, do nothing
-      if (currentTeam === selectedTeam) {
-        return;
-      }
+    //   // If the clicked tile belongs to the selected team, do nothing
+    //   if (currentTeam === selectedTeam) {
+    //     return;
+    //   }
 
-      // Handle the scenario where the tile does not belong to the selected team
-      if (teamTiles[selectedTeam] === 0 && !capitals[selectedTeam].exists) {
-        // New team is trying to place their first tile
-        if (square.classList.contains("capital")) {
-          // If the tile is already a capital, show an error message
-          showErrorPopup(
-            "You cannot place your capital on another team's capital.",
-          );
-          return;
-        } else {
-          // Make it the capital
-          makeCapital(square, selectedTeam, teamColor);
-          startCooldown(); // Start cooldown when making a capital
-        }
-      } else if (currentTeam !== selectedTeam) {
-        if (canChangeTeam(square, selectedTeam)) {
-          if (square.classList.contains("capital")) {
-            capitals[currentTeam].clicks++;
-            console.log(
-              `Capital clicked ${capitals[currentTeam].clicks} times`,
-            );
-            // Set the blink colors
-            square.style.setProperty("--attack-color", teamColor);
-            square.style.setProperty(
-              "--original-color",
-              teamColorMap[currentTeam].primary,
-            );
+    //   // Handle the scenario where the tile does not belong to the selected team
+    //   if (teamTiles[selectedTeam] === 0 && !capitals[selectedTeam].exists) {
+    //     // New team is trying to place their first tile
+    //     if (square.classList.contains("capital")) {
+    //       // If the tile is already a capital, show an error message
+    //       showErrorPopup(
+    //         "You cannot place your capital on another team's capital.",
+    //       );
+    //       return;
+    //     } else {
+    //       // Make it the capital
+    //       makeCapital(square, selectedTeam, teamColor);
+    //       startCooldown(); // Start cooldown when making a capital
+    //     }
+    //   } else if (currentTeam !== selectedTeam) {
+    //     if (canChangeTeam(square, selectedTeam)) {
+    //       if (square.classList.contains("capital")) {
+    //         capitals[currentTeam].clicks++;
+    //         // Set the blink colors
+    //         square.style.setProperty("--attack-color", teamColor);
+    //         square.style.setProperty(
+    //           "--original-color",
+    //           teamColorMap[currentTeam].primary,
+    //         );
 
-            // Trigger the blink effect
-            square.classList.add("blink");
+    //         // Trigger the blink effect
+    //         square.classList.add("blink");
 
-            // Remove the blink class after the animation ends
-            setTimeout(() => {
-              square.classList.remove("blink");
-            }, 200); // Duration matches the CSS animation time
+    //         // Remove the blink class after the animation ends
+    //         setTimeout(() => {
+    //           square.classList.remove("blink");
+    //         }, 200); // Duration matches the CSS animation time
 
-            startCooldown(); // Start cooldown when attacking a capital
-            if (capitals[currentTeam].clicks >= 3) {
-              // Require 3 clicks to conquer
-              conquerCapital(square, selectedTeam, teamColor);
-            }
-          } else {
-            square.style.backgroundColor = teamColor;
-            square.dataset.team = selectedTeam;
-            teamTiles[selectedTeam]++;
-            console.log(
-              `Tile placed by ${selectedTeam}, total tiles: ${teamTiles[selectedTeam]}`,
-            );
-            updateScoreboard();
-            startCooldown(); // Start cooldown when conquering a tile
-            checkGameState();
-          }
-        } else {
-          // Show error message if the tile is not adjacent to one of the team's tiles
-          showErrorPopup(
-            "You can't click this tile. It's not next to your team's tiles.",
-          );
-        }
-      }
-    }
+    //         startCooldown(); // Start cooldown when attacking a capital
+    //         if (capitals[currentTeam].clicks >= 3) {
+    //           // Require 3 clicks to conquer
+    //           conquerCapital(square, selectedTeam, teamColor);
+    //         }
+    //       } else {
+    //         square.style.backgroundColor = teamColor;
+    //         square.dataset.team = selectedTeam;
+    //         teamTiles[selectedTeam]++;
+    //         updateScoreboard();
+    //         startCooldown(); // Start cooldown when conquering a tile
+    //         checkGameState();
+    //       }
+    //     } else {
+    //       // Show error message if the tile is not adjacent to one of the team's tiles
+    //       showErrorPopup(
+    //         "You can't click this tile. It's not next to your team's tiles.",
+    //       );
+    //     }
+    //   }
+    // }
   }
 
   function makeCapital(square, team, color) {
@@ -258,9 +288,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     square.style.setProperty("--star-color", secondaryColor);
     teamTiles[team]++;
-    console.log(
-      `${capitalize(team)} team created a capital at row ${square.dataset.row}, col ${square.dataset.col}`,
-    );
     updateScoreboard();
     checkGameState();
   }
@@ -282,9 +309,6 @@ document.addEventListener("DOMContentLoaded", () => {
       clicks: 0,
       autoClicks: 0,
     }; // The new team's capital
-    console.log(
-      `${capitalize(team)} team conquered the capital of ${capitalize(prevTeam)} team`,
-    );
     updateScoreboard();
     checkGameState();
   }
@@ -299,10 +323,6 @@ document.addEventListener("DOMContentLoaded", () => {
       [0, 1],
     ];
 
-    console.log(
-      `Checking adjacent tiles for (${row}, ${col}) with target team ${team}`,
-    );
-
     return adjacentOffsets.some((offset) => {
       const newRow = row + offset[0];
       const newCol = col + offset[1];
@@ -313,9 +333,6 @@ document.addEventListener("DOMContentLoaded", () => {
         newCol < gridSize
       ) {
         const adjacentSquareTeam = squares[newRow][newCol].dataset.team;
-        console.log(
-          `Checking square at (${newRow}, ${newCol}): team ${adjacentSquareTeam}`,
-        );
         return adjacentSquareTeam === team;
       }
       return false;
@@ -344,14 +361,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (expandableSquares.length > 0) {
       const squareToExpandFrom =
         expandableSquares[getRandomInt(expandableSquares.length)];
-      console.log(
-        `Expanding color ${color} from row ${squareToExpandFrom.dataset.row}, col ${squareToExpandFrom.dataset.col}`,
-      );
       expandFromSquare(squareToExpandFrom, color);
       updateScoreboard();
       checkGameState();
     } else {
-      console.log(`No expandable squares for color ${color}`);
+      //   console.log(`No expandable squares for color ${color}`);
     }
   }
 
@@ -374,9 +388,6 @@ document.addEventListener("DOMContentLoaded", () => {
         newCol >= 0 &&
         newCol < gridSize
       ) {
-        console.log(
-          `Checking square at row ${newRow}, col ${newCol}: ${squares[newRow][newCol].style.backgroundColor}`,
-        );
         return (
           squares[newRow][newCol].style.backgroundColor !== color &&
           !squares[newRow][newCol].classList.contains("capital")
@@ -427,12 +438,11 @@ document.addEventListener("DOMContentLoaded", () => {
           (team) => teamColorMap[team].primary === color,
         );
         teamTiles[targetSquare.dataset.team]++;
-        console.log(`Color ${color} expanding to row ${newRow}, col ${newCol}`);
       }
     } else {
-      console.log(
-        `No expandable positions for color ${color} from row ${square.dataset.row}, col ${square.dataset.col}`,
-      );
+      //   console.log(
+      //     `No expandable positions for color ${color} from row ${square.dataset.row}, col ${square.dataset.col}`,
+      //   );
     }
   }
 
@@ -543,13 +553,6 @@ document.addEventListener("DOMContentLoaded", () => {
     victoryScreen.textContent = message;
     victoryScreen.style.display = "block";
   }
-
-  // Automatic expansion for one random team every 0.4 seconds
-  setInterval(() => {
-    const color = teamColors[getRandomInt(teamColors.length)];
-    console.log(`Attempting to expand color ${color}`);
-    expandColor(color);
-  }, 400);
 
   // Initial scoreboard update
   updateScoreboard();
