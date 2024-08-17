@@ -8,8 +8,8 @@ const players = {
 };
 
 const teams = {
-  red: { color: "red", secondaryColor: "lightred" },
-  blue: { color: "blue", secondaryColor: "cyan" },
+  red: { color: "red", secondaryColor: "lightred", capital: null },
+  blue: { color: "blue", secondaryColor: "cyan", capital: null },
 };
 
 const squaresData: (string | null)[][] = [];
@@ -21,6 +21,17 @@ for (let row = 0; row < gridSize; row++) {
   for (let col = 0; col < gridSize; col++) {
     squaresData[row].push(null);
   }
+}
+function countTeamTiles(team: string): number {
+  let count = 0;
+  for (let row = 0; row < squaresData.length; row++) {
+    for (let col = 0; col < squaresData[row].length; col++) {
+      if (squaresData[row][col] === team) {
+        count++;
+      }
+    }
+  }
+  return count;
 }
 
 const server = Bun.serve<{ authToken: string }>({
@@ -36,20 +47,36 @@ const server = Bun.serve<{ authToken: string }>({
     async message(ws, message) {
       if (typeof message === "string") {
         const data = JSON.parse(message);
-
-        const event = data.event;
+        const { event, team, row, col } = data;
 
         if (event === "colorSquare") {
-          console.log(
-            "Coloring square " +
-              data.row +
-              " " +
-              data.col +
-              " for team " +
-              data.team,
-          );
-          squaresData[data.row][data.col] = data.team;
+          console.log(`Coloring square at row ${row}, col ${col} for team ${team}`);
 
+          const teamTileCount = countTeamTiles(team);
+
+          if (!teams[team].capital && teamTileCount === 0) {
+            // No capital and no tiles; this tile becomes the capital
+            teams[team].capital = { row, col, clicks: 0 };
+            squaresData[row][col] = team;
+            console.log(`Capital placed for team ${team} at row ${row}, col ${col}`);
+          } else if (squaresData[row][col] !== team) {
+            const currentTeam = squaresData[row][col];
+            if (currentTeam && teams[currentTeam].capital?.row === row && teams[currentTeam].capital?.col === col) {
+              // Handle attacks on a capital
+              teams[currentTeam].capital.clicks++;
+              if (teams[currentTeam].capital.clicks >= 3) {
+                // Conquer the capital
+                teams[currentTeam].capital = null;
+                squaresData[row][col] = team;
+                console.log(`Capital at row ${row}, col ${col} conquered by team ${team}`);
+              }
+            } else {
+              // Normal tile capture
+              squaresData[row][col] = team;
+            }
+          }
+
+          // Broadcast the updated squares to all connected clients
           ws.send(
             JSON.stringify({
               event: "updateSquares",
