@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   socket.addEventListener("open", function (event) {
     console.log("WebSocket connection opened");
-    // socket.send("Hello didrik!");
   });
 
   socket.addEventListener("message", function (event) {
